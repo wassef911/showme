@@ -1,0 +1,12 @@
+-r requirements.txt
+pytest 
+isort 
+pre-commit 
+wemake-python-styleguide 
+autoflake 
+pytest-cov 
+anyio 
+pytest-env 
+fakeredis 
+httpx 
+taskiq

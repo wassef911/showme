@@ -1,0 +1,76 @@
+version: "3.9"
+
+x-app: &app
+  build:
+    context: .
+  restart: always
+  env_file:
+  - .env
+  depends_on:
+    redis:
+      condition: service_healthy
+    kafka:
+      condition: service_healthy
+  volumes:
+  - .:/opt/app
+  environment:
+    SHOWME_HOST: 0.0.0.0
+    SHOWME_DB_FILE: /database/db.sqlite3
+    SHOWME_REDIS_HOST: showme-redis
+    TESTKAFKA_KAFKA_BOOTSTRAP_SERVERS: '["showme-kafka:9092"]'
+
+services:
+  api:
+    <<: *app
+    command: /opt/app/entrypoint.sh
+    ports:
+    - "8000:8000"
+
+  taskiq-worker:
+    <<: *app
+    command:
+    - taskiq
+    - worker
+    - showme.tkq:broker --reload
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: "showme-redis"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50
+
+  zookeeper:
+    image: "bitnami/zookeeper:3.7.1"
+    hostname: "showme-zookeeper"
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_LOG_LEVEL: "ERROR"
+    healthcheck:
+      test: zkServer.sh status
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  kafka:
+    image: "bitnami/kafka:3.2.0"
+    hostname: "showme-kafka"
+    environment:
+      KAFKA_BROKER_ID: "1"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_LISTENERS: "PLAINTEXT://0.0.0.0:9092"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://showme-kafka:9092"
+      KAFKA_CFG_ZOOKEEPER_CONNECT: "showme-zookeeper:2181"
+    healthcheck:
+      test: kafka-topics.sh --list --bootstrap-server localhost:9092
+      interval: 1s
+      timeout: 3s
+      retries: 30
+    depends_on:
+      zookeeper:
+        condition: service_healthy
