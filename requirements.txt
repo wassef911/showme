@@ -29,3 +29,7 @@ taskiq-fastapi
 taskiq-redis
 pyzmq
 asyncio
+shapely
+geopandas
+matplotlib
+orjson

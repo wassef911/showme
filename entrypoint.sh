@@ -4,4 +4,4 @@
 
 echo "Run the application in production mode with gunicorn"
 
-python ./showme
+python -m showme

@@ -31,7 +31,7 @@ services:
     command:
     - taskiq
     - worker
-    - showme.tkq:broker --reload
+    - showme.tkq:broker
 
   redis:
     image: bitnami/redis:6.2.5

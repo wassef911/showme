@@ -1,9 +1,7 @@
-from importlib import metadata
-
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 
-from showme.logging import configure_logging
+from showme.log import configure_logging
 from showme.web.api.router import api_router
 from showme.web.lifetime import register_shutdown_event, register_startup_event
 
@@ -19,7 +17,7 @@ def get_app() -> FastAPI:
     configure_logging()
     app = FastAPI(
         title="showme",
-        version=metadata.version("showme"),
+        version="1.0.1",
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
