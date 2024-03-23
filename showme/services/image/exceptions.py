@@ -1,0 +1,2 @@
+class CountryNotFoundException(Exception):
+    pass

@@ -33,3 +33,14 @@ shapely
 geopandas
 matplotlib
 orjson
+pytest 
+isort 
+pre-commit 
+wemake-python-styleguide 
+autoflake 
+pytest-cov 
+anyio 
+pytest-env 
+fakeredis 
+httpx
+pytest-sugar==1.0.0
