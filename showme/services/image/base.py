@@ -10,14 +10,20 @@ import orjson
 
 
 class BaseImageService(ABC):
-    def find_feature_by_country_gdf_as_geojson(self, country_name, gdf) -> dict:
+    def find_feature_by_country_gdf_as_geojson(
+        self,
+        filter_name: str,
+        filter_value: str,
+        gdf,
+    ) -> dict:
         """
         Searches for features in a GeoDataFrame where the 'sovereignt'
         column matches the given country name and returns the matching features as GeoJSON.
         Raises an error if no matching feature is found.
 
         Parameters:
-        - country_name: A string representing the name of the country.
+        - filter_name: A string representing a query.
+        - filter_value: A string representing the query value.
         - gdf: A GeoDataFrame containing the feature collection.
 
         Returns:
@@ -26,13 +32,11 @@ class BaseImageService(ABC):
         Raises:
         - CountryNotFoundException: If no matching feature is found.
         """
-        formatted_country_name = country_name.lower().capitalize()
-
-        matching_features = gdf[gdf["sovereignt"] == formatted_country_name]
+        matching_features = gdf[gdf[filter_name] == filter_value]
 
         if matching_features.empty:
             raise CountryNotFoundException(
-                f"No matching countries under the sovereignt of: {formatted_country_name}",
+                f"No matching countries under {filter_name} = {filter_value}",
             )
 
         matching_features_geojson = matching_features.to_json()
@@ -118,30 +122,33 @@ class ImageService(BaseImageService):
 
     def get_country_image(
         self,
-        country_name: str,
+        filter_name: str,
+        filter_value: str,
         buffer,
         simplify: float,
     ) -> io.BytesIO:
         geojson_feature = self.find_feature_by_country_gdf_as_geojson(
-            country_name,
+            filter_name,
+            filter_value,
             self.world_geojson,
         )
-        country_geom: Polygon | MultiPolygon = shape(
-            geojson_feature["features"][0]["geometry"],
-        )
-
-        if isinstance(country_geom, Polygon):
-            country_geom = country_geom.buffer(buffer).simplify(simplify)
-        else:
-            country_geom = unary_union(
-                [g.buffer(buffer).simplify(simplify) for g in country_geom.geoms],
+        for idx, each in enumerate(geojson_feature["features"]):
+            country_geom: Polygon | MultiPolygon = shape(
+                each["geometry"],
             )
 
-        geojson_feature["features"][0]["geometry"] = orjson.loads(
-            shapely.to_geojson(country_geom),
-        )
+            if isinstance(country_geom, Polygon):
+                country_geom = country_geom.buffer(buffer).simplify(simplify)
+            else:
+                country_geom = unary_union(
+                    [g.buffer(buffer).simplify(simplify) for g in country_geom.geoms],
+                )
+
+            geojson_feature["features"][idx]["geometry"] = orjson.loads(
+                shapely.to_geojson(country_geom),
+            )
         country_image_buffer = self.plot_geojson_and_save(
             geojson_feature,
-            text=country_name,
+            text=f"{filter_name}: {filter_value}",
         )
         return country_image_buffer
