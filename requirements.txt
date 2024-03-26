@@ -44,3 +44,4 @@ pytest-env
 fakeredis 
 httpx
 pytest-sugar==1.0.0
+azure-storage-blob
