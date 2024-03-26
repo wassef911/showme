@@ -39,7 +39,7 @@ jobs:
       with:
         python-version: "3.9"
     - name: Install deps
-      run: python3 -m pip install -r requirements-dev.txt
+      run: python3 -m pip install -r requirements.txt
 
     - name: Run pytest check
       run: python3 -m pytest -vv --cov="showme" .
