@@ -3,7 +3,7 @@ from io import BytesIO
 from loguru import logger
 
 
-class BlobStorageService:
+class ImageStorageService:
     container_client: ContainerClient
     container_name: str
     blob_service_client: BlobServiceClient
@@ -84,7 +84,7 @@ class BlobStorageService:
         Returns:
         - True if the blob was deleted successfully, False if the blob does not exist.
         """
-        if self.image_exists(blob_name):
+        if not self.image_exists(blob_name):
             return False
 
         blob_client = self.blob_service_client.get_blob_client(
@@ -116,3 +116,19 @@ class BlobStorageService:
         )
         image_data = blob_client.download_blob().readall()
         return BytesIO(image_data)
+
+    def get_image_url(self, blob_name) -> str:
+        """
+        Get the URL of the specified blob in the container.
+
+        Parameters:
+        - blob_name: The name of the blob to retrieve.
+
+        Returns:
+        - A string containing the URL of the blob.
+        """
+        blob_client = self.blob_service_client.get_blob_client(
+            container=self.container_name,
+            blob=blob_name,
+        )
+        return blob_client.url
