@@ -3,18 +3,25 @@ from io import BytesIO
 from loguru import logger
 
 
-class ImageStorageService:
-    container_client: ContainerClient
-    container_name: str
+class SecureBlobMixin:
     blob_service_client: BlobServiceClient
 
-    def __init__(self, connection_string: str, container_name: str):
+    def __init__(self, connection_string: str):
         """- connection_string: The connection string to the Azure Blob Storage account."""
         self.blob_service_client: BlobServiceClient = (
             BlobServiceClient.from_connection_string(
                 connection_string,
             )
         )
+
+
+class ImageStorageService(SecureBlobMixin):
+    container_client: ContainerClient
+    container_name: str
+
+    def __init__(self, connection_string: str, container_name: str):
+        """- connection_string: The connection string to the Azure Blob Storage account."""
+        super().__init__(connection_string)
         self._ensure_container_exists(container_name)
 
     def _ensure_container_exists(self, container_name):
@@ -49,7 +56,7 @@ class ImageStorageService:
         )
         return blob_client.exists()
 
-    def upload_image_if_not_exists(self, blob_name, bytes_io: BytesIO):
+    def upload_image_if_not_exists(self, blob_name, bytes_io: BytesIO) -> bool:
         """
         Check if a PNG image exists in the specified Azure Blob Storage container and if not, upload it from a BytesIO object.
 

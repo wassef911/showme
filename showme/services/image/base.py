@@ -7,6 +7,7 @@ import shapely
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import orjson
+from showme.services.blob import ImageStorageService
 
 
 class BaseImageService(ABC):
@@ -124,7 +125,7 @@ class ImageService(BaseImageService):
         self,
         filter_name: str,
         filter_value: str,
-        buffer,
+        buffer: float,
         simplify: float,
     ) -> io.BytesIO:
         geojson_feature = self.find_feature_by_country_gdf_as_geojson(
@@ -152,3 +153,32 @@ class ImageService(BaseImageService):
             text=f"{filter_name}: {filter_value}",
         )
         return country_image_buffer
+
+
+class ImageServicePersisted(ImageService):
+    def __init__(
+        self,
+        storage_service: ImageStorageService,
+        world_file_path: str = "data/world.geojson",
+    ):
+        super().__init__(world_file_path)
+        self.storage_service = storage_service
+
+    def get_country_image(
+        self,
+        filter_name: str,
+        filter_value: str,
+        buffer: float,
+        simplify: float,
+    ) -> io.BytesIO:
+        filename: str = f"{filter_name}_{filter_value}_{buffer}_{simplify}.png"
+        if self.storage_service.image_exists(filename):
+            return self.storage_service.get_image(filename)
+        buff = super().get_country_image(
+            filter_name,
+            filter_value,
+            buffer,
+            simplify,
+        )
+        self.storage_service.upload_image_if_not_exists(filename, buff)
+        return buff

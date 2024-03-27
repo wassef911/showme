@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from showme.services.image import ImageService
+from showme.services.image import ImageServicePersisted
+from showme.services.blob import ImageStorageService
 from showme.web.dependencies import ImageServiceeMarker
 from showme.log import configure_logging
 from showme.web.api.router import api_router
 from showme.web.lifetime import register_shutdown_event, register_startup_event
+from showme.settings import settings
 
 
 def get_app() -> FastAPI:
@@ -37,10 +39,13 @@ def get_app() -> FastAPI:
     # Adds startup and shutdown events.
     register_startup_event(app)
     register_shutdown_event(app)
+    storage_service = ImageStorageService(
+        settings.azure_blob_connection_string,
+        settings.azure_blob_container_name,
+    )
+    image_service = ImageServicePersisted(storage_service=storage_service)
 
-    image_service = ImageService()
-
-    def get_image_service() -> ImageService:
+    def get_image_service() -> ImageServicePersisted:
         return image_service
 
     app.dependency_overrides.update(

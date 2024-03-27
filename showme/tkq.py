@@ -1,7 +1,7 @@
 import taskiq_fastapi
 from taskiq import InMemoryBroker
 from taskiq_redis import ListQueueBroker, RedisAsyncResultBackend
-from showme.services.image import ImageService, CountryNotFoundException
+from showme.services.image import ImageServicePersisted, CountryNotFoundException
 from showme.services.blob import ImageStorageService
 from loguru import logger
 
@@ -23,11 +23,11 @@ taskiq_fastapi.init(
 )
 
 # Singletons
-image_service = ImageService()
 storage_service = ImageStorageService(
     settings.azure_blob_connection_string,
     settings.azure_blob_container_name,
 )
+image_service = ImageServicePersisted(storage_service=storage_service)
 
 
 @broker.task
@@ -44,9 +44,9 @@ async def run_coutries_by_name(
     for i, country_name in enumerate(countries_names):
         formatted_country_name = country_name.lower().capitalize()
         filter_name = "sovereignt"
-        blob_name = f"{filter_name}_{formatted_country_name}.png"
+        blob_name = f"{filter_name}_{formatted_country_name}_{buffer}_{simplify}.png"
         try:
-            buff = image_service.get_country_image(
+            image_service.get_country_image(
                 filter_name,
                 formatted_country_name,
                 buffer,
@@ -55,7 +55,6 @@ async def run_coutries_by_name(
         except CountryNotFoundException as exc:
             logger.error(f"Error processing country {country_name}: {exc}")
             continue
-        storage_service.upload_image_if_not_exists(blob_name, buff)
         image_urls.append(storage_service.get_image_url(blob_name))
 
     logger.info(f"Processed {image_urls} countries")
@@ -75,9 +74,9 @@ async def run_coutries_by_eco(
     image_urls = []
     for i, economy in enumerate(economies):
         filter_name = "economy"
-        blob_name = f"{filter_name}_{economy}.png"
+        blob_name = f"{filter_name}_{economy}_{buffer}_{simplify}.png"
         try:
-            buff = image_service.get_country_image(
+            image_service.get_country_image(
                 filter_name,
                 economy,
                 buffer,
@@ -86,7 +85,6 @@ async def run_coutries_by_eco(
         except CountryNotFoundException as exc:
             logger.error(f"Error processing country {economy}: {exc}")
             continue
-        storage_service.upload_image_if_not_exists(blob_name, buff)
         image_urls.append(storage_service.get_image_url(blob_name))
     return image_urls
 
@@ -104,9 +102,9 @@ async def run_coutries_by_income(
     image_urls = []
     for i, income_grp in enumerate(income_grps):
         filter_name = "economy"
-        blob_name = f"{filter_name}_{income_grp}.png"
+        blob_name = f"{filter_name}_{income_grp}_{buffer}_{simplify}.png"
         try:
-            buff = image_service.get_country_image(
+            image_service.get_country_image(
                 filter_name,
                 income_grp,
                 buffer,
@@ -115,6 +113,5 @@ async def run_coutries_by_income(
         except CountryNotFoundException as exc:
             logger.error(f"Error processing country {income_grp}: {exc}")
             continue
-        storage_service.upload_image_if_not_exists(blob_name, buff)
         image_urls.append(storage_service.get_image_url(blob_name))
     return image_urls
