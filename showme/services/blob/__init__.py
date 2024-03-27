@@ -1,4 +1,4 @@
 """Blob service."""
 
-from .base import *
-from .exceptions import *
+from .base import *  # noqa
+from .exceptions import *  # noqa

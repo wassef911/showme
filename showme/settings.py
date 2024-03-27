@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     db_echo: bool = False
 
     # Variables for Redis
-    redis_host: str = "showme-redis"
+    redis_host: str = "redis"
     redis_port: int = 6379
     redis_user: Optional[str] = None
     redis_pass: Optional[str] = None
@@ -55,7 +55,8 @@ class Settings(BaseSettings):
     # This variable is used to define
     # multiproc_dir. It's required for [uvi|guni]corn projects.
     prometheus_dir: Path = TEMP_DIR / "prom"
-
+    azure_blob_connection_string: str = os.getenv("AZURE_BLOB_CONNECTION_STRING", "")
+    azure_blob_container_name: str = os.getenv("AZURE_BLOB_CONTAINER_NAME", "showme")
     # Grpc endpoint for opentelemetry.
     # E.G. http://localhost:4317
     opentelemetry_endpoint: Optional[str] = None
