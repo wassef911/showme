@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run pytest check
-        run: docker-compose run --rm api pytest -vv --cov="showme" .
+        run: docker-compose run --rm api pytest -vv
         env:
           AZURE_BLOB_CONNECTION_STRING: ${{ env.AZURE_BLOB_CONNECTION_STRING }}
 

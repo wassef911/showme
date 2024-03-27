@@ -86,3 +86,15 @@ async def test_getting_countries_by_income_image_exc_not_found(
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.anyio
+async def test_batch(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+) -> None:
+    countries = ["France", "Tunisia"]
+    url = "api/batch/country_name"
+    response = await client.post(url, json={"filter_values": countries})
+
+    assert response.status_code == status.HTTP_201_CREATED
