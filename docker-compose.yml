@@ -9,8 +9,8 @@ x-app: &app
       condition: service_healthy
     kafka:
       condition: service_healthy
-  volumes:
-    - .:/opt/app
+  # volumes:
+  #   - .:/opt/app
   environment:
     - AZURE_BLOB_CONNECTION_STRING
     - SHOWME_HOST

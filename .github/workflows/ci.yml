@@ -13,9 +13,6 @@ jobs:
         env:
           AZURE_BLOB_CONNECTION_STRING: ${{ secrets.AZURE_BLOB_CONNECTION_STRING }}
           SHOWME_HOST: 0.0.0.0
-          SHOWME_DB_FILE: database/db.sqlite3
-          SHOWME_REDIS_HOST: redis
-          TESTKAFKA_KAFKA_BOOTSTRAP_SERVERS: '["showme-kafka:9092"]'
 
   push_to_registry:
     needs: pytest
