@@ -9,9 +9,13 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run pytest check
-        run: docker-compose run --rm api pytest -vv
+        run: docker-compose run --rm api pytest
         env:
-          AZURE_BLOB_CONNECTION_STRING: ${{ env.AZURE_BLOB_CONNECTION_STRING }}
+          AZURE_BLOB_CONNECTION_STRING: ${{ secrets.AZURE_BLOB_CONNECTION_STRING }}
+          SHOWME_HOST: 0.0.0.0
+          SHOWME_DB_FILE: database/db.sqlite3
+          SHOWME_REDIS_HOST: redis
+          TESTKAFKA_KAFKA_BOOTSTRAP_SERVERS: '["showme-kafka:9092"]'
 
   push_to_registry:
     needs: pytest

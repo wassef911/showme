@@ -10,26 +10,27 @@ x-app: &app
     kafka:
       condition: service_healthy
   volumes:
-  - .:/opt/app
+    - .:/opt/app
   environment:
-    SHOWME_HOST: 0.0.0.0
-    SHOWME_DB_FILE: /database/db.sqlite3
-    SHOWME_REDIS_HOST: redis
-    TESTKAFKA_KAFKA_BOOTSTRAP_SERVERS: '["showme-kafka:9092"]'
+    - AZURE_BLOB_CONNECTION_STRING
+    - SHOWME_HOST
+    - SHOWME_DB_FILE
+    - SHOWME_REDIS_HOST
+    - TESTKAFKA_KAFKA_BOOTSTRAP_SERVERS
 
 services:
   api:
     <<: *app
     command: /opt/app/entrypoint.sh
     ports:
-    - "8000:8000"
+      - "8000:8000"
 
   worker:
     <<: *app
     command:
-    - taskiq
-    - worker
-    - showme.tkq:broker
+      - taskiq
+      - worker
+      - showme.tkq:broker
 
   redis:
     image: bitnami/redis:6.2.5
