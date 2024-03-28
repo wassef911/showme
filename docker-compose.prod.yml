@@ -1,17 +1,14 @@
 version: "3.9"
 
 x-app: &app
-  build:
-    context: .
+  image: ghcr.io/wassef911/showme:main-latest
   restart: always
   depends_on:
     redis:
       condition: service_healthy
     kafka:
       condition: service_healthy
-  # volumes:
-  #   - .:/opt/app
-  environment:
+  env_file:
     - AZURE_BLOB_CONNECTION_STRING
     - SHOWME_HOST
     - SHOWME_DB_FILE
