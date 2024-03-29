@@ -55,7 +55,7 @@ An example of .env file:
 
 ```bash
 SHOWME_RELOAD="True"
-SHOWME_PORT="8000"
+SHOWME_PORT="80"
 SHOWME_ENVIRONMENT="dev"
 ```
 

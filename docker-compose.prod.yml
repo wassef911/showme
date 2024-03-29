@@ -3,11 +3,6 @@ version: "3.9"
 x-app: &app
   image: ghcr.io/wassef911/showme:main-latest
   restart: always
-  depends_on:
-    redis:
-      condition: service_healthy
-    kafka:
-      condition: service_healthy
   env_file:
     - AZURE_BLOB_CONNECTION_STRING
     - SHOWME_HOST
@@ -20,16 +15,10 @@ services:
     <<: *app
     command: /opt/app/entrypoint.sh
     ports:
-      - "8000:8000"
+      - "80:80"
 
   worker:
     <<: *app
-    deploy:
-      replicas: 2
-      resources:
-        limits:
-          cpus: "1"
-          memory: 250M
     command:
       - taskiq
       - worker
@@ -40,11 +29,6 @@ services:
     restart: always
     environment:
       ALLOW_EMPTY_PASSWORD: "yes"
-    healthcheck:
-      test: redis-cli ping
-      interval: 1s
-      timeout: 3s
-      retries: 50
 
   zookeeper:
     image: "bitnami/zookeeper:3.7.1"
@@ -52,11 +36,6 @@ services:
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"
       ZOO_LOG_LEVEL: "ERROR"
-    healthcheck:
-      test: zkServer.sh status
-      interval: 1s
-      timeout: 3s
-      retries: 30
 
   kafka:
     image: "bitnami/kafka:3.2.0"
@@ -67,11 +46,3 @@ services:
       KAFKA_CFG_LISTENERS: "PLAINTEXT://0.0.0.0:9092"
       KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://showme-kafka:9092"
       KAFKA_CFG_ZOOKEEPER_CONNECT: "showme-zookeeper:2181"
-    healthcheck:
-      test: kafka-topics.sh --list --bootstrap-server localhost:9092
-      interval: 1s
-      timeout: 3s
-      retries: 30
-    depends_on:
-      zookeeper:
-        condition: service_healthy

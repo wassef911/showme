@@ -23,7 +23,7 @@ services:
     <<: *app
     command: /opt/app/entrypoint.sh
     ports:
-      - "8000:8000"
+      - "80:80"
 
   worker:
     <<: *app
