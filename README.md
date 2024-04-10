@@ -1,6 +1,6 @@
 # showme
 
-This is a dummy project part of march side sprint.
+This is a dummy GIS Rest-Api, part of the March side sprint.
 
 ![demo_resource_visualizer](https://raw.githubusercontent.com/wassef911/showme/master/demo_resource_visualizer.png)
 
